@@ -196,9 +196,17 @@ static EVENT_TAP_CALLBACK(key_handler)
         if (!current_mode) return event;
 
         struct hotkey eventkey;
-        if (intercept_systemkey(event, &eventkey)) {
+        bool aux_control_keydown = intercept_systemkey(event, &eventkey);
+        if (aux_control_keydown) {
             bool result = find_and_exec_hotkey(&eventkey, &mode_map, &current_mode, &carbon);
             if (result) return NULL;
+        }
+
+        // We need to explicitly ignore the `NX_KEYUP` event for 'rewind'/'fast'
+        // otherwise the default behaviour still triggers.
+        if (!aux_control_keydown && (eventkey.key == 0x14 || eventkey.key == 0x13)) {
+            debug("Ignored 'rewind'/'fast' keyup event\n");
+            return NULL;
         }
     } break;
     }

@@ -291,13 +291,13 @@ bool intercept_systemkey(CGEventRef event, struct hotkey *eventkey)
     uint8_t key_stype = data[123];
     CFRelease(event_data);
 
+    // The `event_tap.mask` only masks `kCGEventKeyDown` and `NX_SYSDEFINED`, we
+    // still receive `NX_KEYUP` events...
     bool result = ((key_state == NX_KEYDOWN) &&
                    (key_stype == NX_SUBTYPE_AUX_CONTROL_BUTTONS));
 
-    if (result) {
-        eventkey->key = key_code;
-        eventkey->flags = cgevent_flags_to_hotkey_flags(CGEventGetFlags(event)) | Hotkey_Flag_NX;
-    }
+    eventkey->key = key_code;
+    eventkey->flags = cgevent_flags_to_hotkey_flags(CGEventGetFlags(event)) | Hotkey_Flag_NX;
 
     return result;
 }
