@@ -117,6 +117,10 @@ find_hotkey(struct mode *mode, struct hotkey *hotkey, uint32_t *capture)
 {
     struct hotkey *result = table_find(&mode->hotkey_map, hotkey);
     if (result) *capture |= HOTKEY_FOUND;
+    if (result)
+        debug("FOUND hotkey for %#08x (%#08x)\n", hotkey->key, hotkey->flags);
+    else
+        debug("NO hotkey for %#08x (%#08x)\n", hotkey->key, hotkey->flags);
     return result;
 }
 
