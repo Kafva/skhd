@@ -139,6 +139,7 @@ static EVENT_TAP_CALLBACK(key_observer_handler)
         struct event_tap *event_tap = (struct event_tap *) reference;
         CGEventTapEnable(event_tap->handle, 1);
     } break;
+    case NX_SYSDEFINED:
     case kCGEventKeyDown:
     case kCGEventFlagsChanged: {
         uint32_t flags = CGEventGetFlags(event);
@@ -146,6 +147,16 @@ static EVENT_TAP_CALLBACK(key_observer_handler)
 
         if (keycode == kVK_ANSI_C && flags & 0x40000) {
             exit(0);
+        }
+
+        if (keycode == 0x0) {
+            // For some reason the keycode is parsed as zero for media keys...
+            // Extract keycode with the method from `intercept_systemkey()`
+            // instead.
+            CFDataRef event_data = CGEventCreateData(kCFAllocatorDefault, event);
+            const uint8_t *data  = CFDataGetBytePtr(event_data);
+            keycode  = data[129];
+            CFRelease(event_data);
         }
 
         printf("\rkeycode: 0x%.2X\tflags: ", keycode);
@@ -383,7 +394,8 @@ static bool parse_arguments(int argc, char **argv)
             return true;
         } break;
         case 'o': {
-            event_tap.mask = (1 << kCGEventKeyDown) |
+            event_tap.mask = (1 << NX_SYSDEFINED) |
+                             (1 << kCGEventKeyDown) |
                              (1 << kCGEventFlagsChanged);
             event_tap_begin(&event_tap, key_observer_handler);
             CFRunLoopRun();
