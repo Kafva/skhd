@@ -126,10 +126,7 @@ static char *populate_plist(int *length)
         error("skhd: 'env USER' not set! abort..\n");
     }
 
-    char *path_env = getenv("PATH");
-    if (!path_env) {
-        error("skhd: 'env PATH' not set! abort..\n");
-    }
+    char *path_env = "/opt/skhd/bin:/usr/local/sbin:/usr/local/bin:/opt/homebrew/bin:/bin:/usr/bin:/usr/sbin:/sbin:/opt/homebrew/sbin";
 
     char exe_path[4096];
     unsigned int exe_path_size = sizeof(exe_path);
